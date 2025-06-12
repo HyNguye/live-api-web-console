@@ -60,7 +60,7 @@ function App() {
 
             <ControlTray
               videoRef={videoRef}
-              supportsVideo={true}
+              supportsVideo={false}
               onVideoStreamChange={setVideoStream}
               enableEditingSettings={true}
             >

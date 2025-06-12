@@ -38,6 +38,21 @@ const declaration: FunctionDeclaration = {
     required: ["json_graph"],
   },
 };
+const dictionary: FunctionDeclaration = {
+  name: "dictionary_check",
+  description: "Checks meaning of a word in the dictionary.",
+  parameters: {
+    type: Type.OBJECT,
+    properties: {
+      word: {
+        type: Type.STRING,
+        description:
+          "The word to check in the dictionary. Must be a string.",
+      },
+    },
+    required: ["word"],
+  },
+};
 
 function AltairComponent() {
   const [jsonString, setJSONString] = useState<string>("");
@@ -53,14 +68,16 @@ function AltairComponent() {
       systemInstruction: {
         parts: [
           {
-            text: 'You are my helpful assistant. Any time I ask you for a graph call the "render_altair" function I have provided you. Dont ask for additional information just make your best judgement.',
+            text: `You are an expert English conversation tutor. Your task is to engage in interactive conversations with learners to improve their English communication skills. Respond to the learner's input in English, using clear and simple language suitable for their level (beginner to intermediate). 
+    Provide response on their input, keep the response concise (under 30 seconds) and relevant to the user's input, and introduce new vocabulary related to the topic. 
+    Make the interaction educational, engaging, and fun, using analogies or examples related to the learner's topic.`,
           },
         ],
       },
       tools: [
         // there is a free-tier quota for search
         { googleSearch: {} },
-        { functionDeclarations: [declaration] },
+        { functionDeclarations: [declaration,dictionary] },
       ],
     });
   }, [setConfig, setModel]);
@@ -70,28 +87,28 @@ function AltairComponent() {
       if (!toolCall.functionCalls) {
         return;
       }
-      const fc = toolCall.functionCalls.find(
-        (fc) => fc.name === declaration.name
-      );
-      if (fc) {
-        const str = (fc.args as any).json_graph;
-        setJSONString(str);
-      }
-      // send data for the response of your tool call
-      // in this case Im just saying it was successful
-      if (toolCall.functionCalls.length) {
-        setTimeout(
-          () =>
-            client.sendToolResponse({
-              functionResponses: toolCall.functionCalls?.map((fc) => ({
-                response: { output: { success: true } },
-                id: fc.id,
-                name: fc.name,
-              })),
-            }),
-          200
-        );
-      }
+      // const fc = toolCall.functionCalls.find(
+      //   (fc) => fc.name === declaration.name
+      // );
+      // if (fc) {
+      //   const str = (fc.args as any)?.json_graph;
+      //   setJSONString(str);
+      // }
+      // // send data for the response of your tool call
+      // // in this case Im just saying it was successful
+      // if (toolCall.functionCalls.length) {
+      //   setTimeout(
+      //     () =>
+      //       client.sendToolResponse({
+      //         functionResponses: toolCall.functionCalls?.map((fc) => ({
+      //           response: { output: { success: true } },
+      //           id: fc.id,
+      //           name: fc.name,
+      //         })),
+      //       }),
+      //     200
+      //   );
+      // }
     };
     client.on("toolcall", onToolCall);
     return () => {
