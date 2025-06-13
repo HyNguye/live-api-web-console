@@ -213,6 +213,12 @@ $animation-duration: 2s;
   animation: blink 1s step-end infinite;
   } 
 
+@media screen and (max-width: 600px) {
+  
+    max-height: 30%;
+    margin-top: 20%;
+  }
+  
 
 }
 @keyframes blink {
@@ -229,9 +235,10 @@ $animation-duration: 2s;
   border-radius: 5px;
   max-width: 600px;
   margin: 0 auto;
+  max-height: 30vh;
 
   .note-content {
-    margin-bottom: 20px;
+    
 
     h4 {
       margin: 0 0 10px;
@@ -271,5 +278,10 @@ $animation-duration: 2s;
       font-size: 16px;
       color: $text-color;
     }
+
+  }
+  @media screen and (max-width: 600px) {
+    max-width: 250px;
+    
   }
 }

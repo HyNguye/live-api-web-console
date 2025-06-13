@@ -1,4 +1,4 @@
-import { set } from "lodash";
+
 import React, { useState, useEffect } from "react";
 interface TypingEffectProps {
   text: string;
@@ -17,7 +17,7 @@ const TypingEffect: React.FC<TypingEffectProps> = ({ text,setText }) => {
       const timer = setTimeout(() => {
         setDisplayedText((prev) => prev + text[index]);
         setIndex(index + 1);
-      }, 10); // Tốc độ gõ, điều chỉnh thời gian (ms) để nhanh/chậm hơn
+      }, 30); // Tốc độ gõ, điều chỉnh thời gian (ms) để nhanh/chậm hơn
       return () => clearTimeout(timer);
     }
   }, [index, text]);

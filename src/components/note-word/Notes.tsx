@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-
+import { useScreenSize } from '../../contexts/ScreenSizeContext'; // Giả sử bạn đã tạo context này
 
 // Định nghĩa kiểu cho props
 interface NoteListProps {
@@ -7,8 +7,9 @@ interface NoteListProps {
 }
 
 const NoteList: React.FC<NoteListProps> = ({ notes }) => {
+  const {isMobile} = useScreenSize();
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const notesPerPage: number = 5; // Số ghi chú mỗi trang
+  const notesPerPage: number = isMobile?1:5; // Số ghi chú mỗi trang
 
   // Tính toán chỉ số bắt đầu và kết thúc của ghi chú trên trang hiện tại
   const indexOfLastNote: number = currentPage * notesPerPage;
