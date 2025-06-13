@@ -174,7 +174,6 @@ body {
 }
 // Biến màu sắc
 $border-color: #ccc;
-$primary-color: #007bff;
 $background-light: #f9f9f9;
 $text-color: #ccc;
 $animation-duration: 2s;
@@ -209,6 +208,16 @@ $animation-duration: 2s;
       background-color: $text-color;
       
     }
+  }
+  .cursor {
+  animation: blink 1s step-end infinite;
+  } 
+
+
+}
+@keyframes blink {
+  50% {
+    opacity: 0;
   }
 }
 .note {

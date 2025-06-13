@@ -13,10 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { useEffect, useRef, useState, memo } from "react";
+import { useEffect, useRef, useState, memo, useCallback } from "react";
 import NoteList from "../note-word/Notes";
 import vegaEmbed from "vega-embed";
 import { useLiveAPIContext } from "../../contexts/LiveAPIContext";
+import TypingEffect from "../typing-text/TypingEffect";
 import {
   FunctionDeclaration,
   FunctionResponse,
@@ -83,6 +84,10 @@ function AltairComponent() {
   const { client, setConfig, setModel } = useLiveAPIContext();
   const [notes, setNote] = useState<string[]>([]);
   const [text, setSTT] = useState<string>("");
+  const setText = useCallback((text: string) => {
+    setSTT(text);
+  }
+, []);
   useEffect(() => {
     setModel("models/gemini-2.0-flash-exp");
     setConfig({
@@ -211,7 +216,7 @@ function AltairComponent() {
     <div className="altair-component">
       <NoteList notes={notes} />
       <div className="vega-embed" ref={embedRef} />
-      {text&&<div className="dialogue">{text}<span id="deleteBtn" onClick={()=>setSTT("")}> X</span></div>}
+      {text && <TypingEffect text={text} setText={setText}/>}
     </div>
   );
 }
