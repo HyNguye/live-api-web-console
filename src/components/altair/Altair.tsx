@@ -26,6 +26,7 @@ import {
 } from "@google/genai";
 
 
+
 const render_altair: FunctionDeclaration = {
   name: "render_altair",
   description: "Displays an altair graph in json format.",
@@ -39,6 +40,21 @@ const render_altair: FunctionDeclaration = {
       },
     },
     required: ["json_graph"],
+  },
+};
+const repeatAndWriteDown: FunctionDeclaration = {
+  name: "write_down",
+  description: "writes last response down for the user. Only use this if the user asks you to repeat something or user cannot hear you.",
+  parameters: {
+    type: Type.OBJECT,
+    properties: {
+      text: {
+        type: Type.STRING,
+        description:
+          "The text to repeat and write down for the user. Must be a string.",
+      },
+    },
+    required: ["text"],
   },
 };
 const noteNewWord: FunctionDeclaration = {
@@ -58,14 +74,15 @@ const noteNewWord: FunctionDeclaration = {
           "A description of the word to help the user understand its meaning and usage.",
       },
     },
-    required: ["word"],
+    required: ["word","describe"],
   },
 };
 
 function AltairComponent() {
   const [jsonString, setJSONString] = useState<string>("");
   const { client, setConfig, setModel } = useLiveAPIContext();
-   const [notes, setNote] = useState<string[]>([]);
+  const [notes, setNote] = useState<string[]>([]);
+  const [text, setSTT] = useState<string>("");
   useEffect(() => {
     setModel("models/gemini-2.0-flash-exp");
     setConfig({
@@ -85,7 +102,7 @@ function AltairComponent() {
       tools: [
         // there is a free-tier quota for search
         { googleSearch: {} },
-        { functionDeclarations: [render_altair,noteNewWord] },
+        { functionDeclarations: [render_altair,noteNewWord,repeatAndWriteDown] },
 
       ],
     });
@@ -135,6 +152,18 @@ function AltairComponent() {
             }
             break;
           }
+          case repeatAndWriteDown.name: {
+            // this is the function call for the repeat and write down
+            // we can get the text from the args
+            const text = (fc.args as any)?.text;
+            setSTT(text || "");
+              responsesToSend.push({
+                response: { output: { success: true, text } },
+                id: fc.id,
+                name: fc.name,
+              });
+            break;
+          }
         }
       }
       // send the responses back to the client
@@ -180,8 +209,9 @@ function AltairComponent() {
   }, [embedRef, jsonString]);
   return (
     <div className="altair-component">
-      <NoteList notes={notes} />;
+      <NoteList notes={notes} />
       <div className="vega-embed" ref={embedRef} />
+      {text&&<div className="dialogue">{text}<span id="deleteBtn" onClick={()=>setSTT("")}> X</span></div>}
     </div>
   );
 }
