@@ -153,6 +153,7 @@ body {
     flex: 1;
     align-items: center;
     justify-content: center;
+    width: 100%;
   }
 
   .function-call {
@@ -170,4 +171,67 @@ body {
   max-width: 90%;
   border-radius: 32px;
   max-height: fit-content;
+}
+// Biến màu sắc
+$border-color: #ccc;
+$primary-color: #007bff;
+$background-light: #f9f9f9;
+$text-color: #ccc;
+.altair-component{
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+.note {
+  position: absolute;
+  top:5%;
+  right: 5%;
+  padding: 20px;
+  border: 1px solid $border-color;
+  border-radius: 5px;
+  max-width: 600px;
+  margin: 0 auto;
+
+  .note-content {
+    margin-bottom: 20px;
+
+    h4 {
+      margin: 0 0 10px;
+      color: $text-color;
+    }
+
+    p {
+      margin: 5px 0;
+      padding: 10px;
+
+    }
+  }
+
+  .pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-top: 20px;
+
+    button {
+      padding: 8px 16px;
+      color: $text-color;
+      border-radius: 5px;
+      cursor: pointer;
+      background: none;
+
+      &:disabled {
+        background: $border-color;
+        border-color: $border-color;
+        cursor: not-allowed;
+        color: $border-color;
+      }
+    }
+
+    span {
+      font-size: 16px;
+      color: $text-color;
+    }
+  }
 }

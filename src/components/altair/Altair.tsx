@@ -14,16 +14,19 @@
  * limitations under the License.
  */
 import { useEffect, useRef, useState, memo } from "react";
+import NoteList from "../note-word/Notes";
 import vegaEmbed from "vega-embed";
 import { useLiveAPIContext } from "../../contexts/LiveAPIContext";
 import {
   FunctionDeclaration,
+  FunctionResponse,
   LiveServerToolCall,
   Modality,
   Type,
 } from "@google/genai";
 
-const declaration: FunctionDeclaration = {
+
+const render_altair: FunctionDeclaration = {
   name: "render_altair",
   description: "Displays an altair graph in json format.",
   parameters: {
@@ -38,16 +41,21 @@ const declaration: FunctionDeclaration = {
     required: ["json_graph"],
   },
 };
-const dictionary: FunctionDeclaration = {
-  name: "dictionary_check",
-  description: "Checks meaning of a word in the dictionary.",
+const noteNewWord: FunctionDeclaration = {
+  name: "note_new_word",
+  description: "Notes a new vocabulary word for the user to learn. Only use this if the user asks you to note a new word or if you want to introduce a new word to the user.",
   parameters: {
     type: Type.OBJECT,
     properties: {
       word: {
         type: Type.STRING,
         description:
-          "The word to check in the dictionary. Must be a string.",
+          "The word to note for the user to learn. Must be a string.",
+      },
+      describe: {
+        type: Type.STRING,
+        description:
+          "A description of the word to help the user understand its meaning and usage.",
       },
     },
     required: ["word"],
@@ -57,7 +65,7 @@ const dictionary: FunctionDeclaration = {
 function AltairComponent() {
   const [jsonString, setJSONString] = useState<string>("");
   const { client, setConfig, setModel } = useLiveAPIContext();
-
+   const [notes, setNote] = useState<string[]>([]);
   useEffect(() => {
     setModel("models/gemini-2.0-flash-exp");
     setConfig({
@@ -77,7 +85,8 @@ function AltairComponent() {
       tools: [
         // there is a free-tier quota for search
         { googleSearch: {} },
-        { functionDeclarations: [declaration,dictionary] },
+        { functionDeclarations: [render_altair,noteNewWord] },
+
       ],
     });
   }, [setConfig, setModel]);
@@ -87,13 +96,58 @@ function AltairComponent() {
       if (!toolCall.functionCalls) {
         return;
       }
-      // const fc = toolCall.functionCalls.find(
-      //   (fc) => fc.name === declaration.name
-      // );
-      // if (fc) {
-      //   const str = (fc.args as any)?.json_graph;
-      //   setJSONString(str);
-      // }
+      const responsesToSend:FunctionResponse[] = [];
+
+      for (const fc of toolCall.functionCalls) {
+        switch (fc?.name) {
+          case render_altair.name: {
+            // this is the function call for the altair graph
+            // we can get the json string from the args
+            const str = (fc.args as any)?.json_graph;
+            if (str) {
+              setJSONString(str);
+            }
+            responsesToSend.push({
+              response: { output: { success: true } },
+              id: fc.id,
+              name: fc.name,
+            });
+            break;
+          }
+          case noteNewWord.name: {
+            // this is the function call for the dictionary check
+            // we can get the word from the args
+            const word = (fc.args as any)?.word;
+
+            const describe = (fc.args as any)?.describe;
+            setNote((prevNotes) => {
+              if (word && !prevNotes.includes(word)) {
+                return [...prevNotes, `${word}: ${describe}`];
+              }
+              return prevNotes;
+            });
+            if (word) {
+              responsesToSend.push({
+                response: { output: { success: true, word ,describe} },
+                id: fc.id,
+                name: fc.name,
+              });
+            }
+            break;
+          }
+        }
+      }
+      // send the responses back to the client
+      if (responsesToSend.length) {
+        setTimeout(
+          () =>
+            client.sendToolResponse({
+              functionResponses: responsesToSend,
+            }),
+          200
+        );
+      }
+
       // // send data for the response of your tool call
       // // in this case Im just saying it was successful
       // if (toolCall.functionCalls.length) {
@@ -124,7 +178,12 @@ function AltairComponent() {
       vegaEmbed(embedRef.current, JSON.parse(jsonString));
     }
   }, [embedRef, jsonString]);
-  return <div className="vega-embed" ref={embedRef} />;
+  return (
+    <div className="altair-component">
+      <NoteList notes={notes} />;
+      <div className="vega-embed" ref={embedRef} />
+    </div>
+  );
 }
 
 export const Altair = memo(AltairComponent);
