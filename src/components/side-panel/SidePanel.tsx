@@ -79,11 +79,11 @@ export default function SidePanel() {
         <h2>Englicious</h2>
         {open ? (
           <button className="opener" onClick={() => setOpen(false)}>
-            <RiSidebarFoldLine color="#b4b8bb" />
+            <RiSidebarFoldLine color="#000000" />
           </button>
         ) : (
           <button className="opener" onClick={() => setOpen(true)}>
-            <RiSidebarUnfoldLine color="#b4b8bb" />
+            <RiSidebarUnfoldLine color="#000000" />
           </button>
         )}
       </header>

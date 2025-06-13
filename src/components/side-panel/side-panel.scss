@@ -1,5 +1,5 @@
 .side-panel {
-  background: var(--Neutral-00);
+  background: var(--main-blue);
   width: 40px;
   /* when closed */
   display: flex;
@@ -40,7 +40,7 @@
 
     h2 {
       position: relative;
-      color: var(--Neutral-90, #e1e2e3);
+      color: var(--Neutral-15, #e1e2e3);
       font-family: "Google Sans";
       font-size: 21px;
       font-style: normal;
